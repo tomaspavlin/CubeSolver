@@ -26,6 +26,7 @@ public class AStarSearch {
 			String currKey = current.getSearchable().getKey();
 			closedList.put(currKey, current);
 			
+			// what about rotations?
 			if(currKey.equals(goalKey)){
 				return current;
 			}
@@ -38,6 +39,7 @@ public class AStarSearch {
 				
 				//if we already visited that node
 				if(closedList.containsKey(childKey)){
+					// HACK H value?
 					double childG = childNode.getGValue();
 					double closedListG = closedList.get(childKey).getGValue();
 					//check our previous distance to new distance

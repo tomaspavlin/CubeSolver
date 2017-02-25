@@ -18,8 +18,8 @@ import ca.germuth.neural_network.trainable.TrainingData;
  * @author Aaron
  */
 public class FileHandler {
-	private static final String TRAINING_DATA_FILE_NAME = "data.csv";
-	private static final String SAVED_NEURAL_NETWORK_FILE_NAME = "NeuralNetwork.csv";
+	public static String TRAINING_DATA_FILE_NAME = "noname-data.csv";
+	public static String SAVED_NEURAL_NETWORK_FILE_NAME = "noname-NeuralNetwork.csv";
 	
 	public static void writeTrainingData(String type, ArrayList<TrainingData> tobeWritten){
 		File f = null;

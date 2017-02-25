@@ -11,8 +11,8 @@ import java.util.HashMap;
 import java.util.Random;
 import java.util.Scanner;
 
-import javax.media.opengl.GLCapabilities;
-import javax.media.opengl.GLProfile;
+import com.jogamp.opengl.GLCapabilities;
+import com.jogamp.opengl.GLProfile;
 import javax.swing.JFrame;
 
 import ca.germuth.neural_network.evolution.Evolvable;
@@ -57,11 +57,29 @@ import ca.germuth.neural_network.trainable.TrainingData;
 //adjust numbers in Genetic Algorithm
 public class Main {
 	final static int PIXEL_WIDTH = 480;
+	final static String CONF_FILENAME = "config.conf";
 	
 	private static Cube cube;
 	private static NeuralNetwork nn;
 	private static String nnType;
+	
+	private static int CUBE_SIZE = 2;
+	
 	public static void main(String[] args) {
+		Conf.load(CONF_FILENAME);
+		
+		
+		GeneticAlgorithm.setPOPULATION_SIZE(Conf.i("POPULATION_SIZE"));
+		GeneticAlgorithm.setITERATIONS(Conf.i("ITERATIONS"));
+		GeneticAlgorithm.setPOPULATION_ELITE_PERCENT(Conf.f("POPULATION_ELITE_PERCENT"));
+		GeneticAlgorithm.setPOPULATION_MUTATION_PERCENT(Conf.f("POPULATION_MUTATION_PERCENT"));
+		GeneticAlgorithm.setPOPULATION_CROSSOVER_PERCENT(Conf.f("POPULATION_CROSSOVER_PERCENT"));
+
+		FileHandler.TRAINING_DATA_FILE_NAME = Conf.s("TRAINING_DATA_FILE_NAME");
+		FileHandler.SAVED_NEURAL_NETWORK_FILE_NAME = Conf.s("SAVED_NEURAL_NETWORK_FILE_NAME");
+		
+		CUBE_SIZE = Conf.i("CUBE_SIZE");
+		
 		Scanner s = new Scanner(System.in);
 		Scanner lineScanner;
 		printOptions();
@@ -75,8 +93,6 @@ public class Main {
 					createNeuralNetwork(lineScanner.next(), s); break;
 				case "evolve":
 					evolveNeuralNetworks(); break;
-				case "config":
-					configGA(s); break;
 				case "solve":
 					solveCube(); break;
 				case "unit":
@@ -94,13 +110,11 @@ public class Main {
 					} else { 
 						System.out.println("Please Enter Error Threshold (Recommended: 200):");
 					}
+					
 					double error_thres = s.nextDouble();
-					System.out.println("Please Enter Learning Rate (Recommended: 0.005):");
-					double learn_rate = s.nextDouble();
-					System.out.println("Please Enter Training Iteraitons (Recommended: >100,000):");
-					int train_iter = s.nextInt();
-					System.out.println("Please Enter Training epochs (Recommended: >25):");
-					int train_epoch= s.nextInt();
+					double learn_rate = Conf.f("LEARNING_RATE");
+					int train_iter = Conf.i("TRAINING_ITERATIONS");
+					int train_epoch= Conf.i("TRAINING_EPOCHS");
 					trainNeuralNetwork(type, error_thres, learn_rate, train_iter, train_epoch);
 					break;
 				case "test":
@@ -119,7 +133,7 @@ public class Main {
 					if(nnType.equals("XOR")){
 						nn.setSolveable(new XOR());
 					}else{
-						createCube(2);
+						createCube(CUBE_SIZE);
 						nn.setSolveable(cube);
 					}
 					System.out.println("Loaded successfully");
@@ -166,7 +180,7 @@ public class Main {
 			sizes[i] = Integer.parseInt(strin[i]);
 		}
 		if(type.equals("CUBE")){
-			createCube(2);
+			createCube(CUBE_SIZE);
 			nn = new NeuralNetwork(cube, 4*6*3, 4, sizes.length, sizes);
 			nnType = "CUBE";
 		}else{
@@ -201,27 +215,19 @@ public class Main {
 		
 	}
 	
-	private static void configGA(Scanner s){
-		System.out.println("Please Enter Population Size (Recommended:400):");
-		GeneticAlgorithm.setPOPULATION_SIZE(s.nextInt());
-		System.out.println("Please Enter GA Iterations (Recommended: 500):");
-		GeneticAlgorithm.setITERATIONS(s.nextInt());
-		System.out.println("Please Enter Elite % (Recommended: 0.2):");
-		GeneticAlgorithm.setPOPULATION_ELITE_PERCENT(s.nextDouble() / 100);
-		System.out.println("Please Enter Mutation % (Recommended: 0.4):");
-		GeneticAlgorithm.setPOPULATION_MUTATION_PERCENT(s.nextDouble() / 100);
-		System.out.println("Please Enter CrossOver % (Recommended: 0.4):");
-		GeneticAlgorithm.setPOPULATION_CROSSOVER_PERCENT(s.nextDouble() / 100);
-		System.out.println("Genetic Algorithm Configured");
-	}
+
 	
+	// generates training data and save it to file
+	// TODO filename
 	private static void trainData(String type) {
 		ArrayList<TrainingData> lines = new ArrayList<TrainingData>();
 		if (type.equals("CUBE")) {
 			HashMap<String, Boolean> visited = new HashMap<String, Boolean>();
 			for (int k = 1; k < 8; k++) {
 				for (int i = 0; i < 50; i++) {
-					Cube experimentCube = new Cube(2);
+
+					System.out.printf("Training cube (%d/%d, %d/%d)\n", k, 8, i, 50);
+					Cube experimentCube = new Cube(CUBE_SIZE);
 					experimentCube.scrambleCube(k);
 					if (experimentCube.isSolved()) {
 						continue;
@@ -234,7 +240,7 @@ public class Main {
 						visited.put(state, true);
 
 						SearchNode sn = SearchFacade.runSearch(SearchType.ASTAR, experimentCube,
-								new Cube(2));
+								new Cube(CUBE_SIZE));
 						String moveToMake = getPath(sn).split(" ")[0];
 						lines.add(new TrainingData(state, moveToMake));
 					}
@@ -270,7 +276,9 @@ public class Main {
 		while(true){
 			
 			if(nn.getSolvable() instanceof Cube){
-				cube.scrambleCube(r.nextInt(8) + 1);
+				int moves = r.nextInt(3) + 1;
+				cube.scrambleCube(moves);
+				System.out.println("Cube scrumbled with " + moves + " moves.");
 				
 				while(!cube.isSolved()){
 					String cubeState = cube.getKey().replaceAll(" |,|\\[|\\]", "");
@@ -279,7 +287,9 @@ public class Main {
 					String move = cube.getMoveString(moveArr);
 					System.out.println("Neural Network Says " + move);
 					System.out.println("Would you like to perform this move (Y/N)");
-					if(!scan.next().trim().toUpperCase().equals("Y")){
+					
+					String resp = scan.nextLine().trim().toUpperCase();
+					if(!resp.equals("Y") && !resp.isEmpty()){
 						break;
 					} else{
 						cube.turn(move);						
@@ -359,7 +369,7 @@ public class Main {
 		System.out.println("--------------------------------------------------------------");
 		System.out.println("The current training data is stored in XORdata.csv");
 		System.out.println("");
-		System.out.println("Enter 'traindata XOR'	to run an experiment creating training data");
+		System.out.println("Enter 'traindata (XOR|CUBE)'	to create training data");
 		System.out.println("Enter 'create XOR'		to create a neural network");
 		System.out.println("Enter 'evolve'			to evolve many neural networks and use best");
 		System.out.println("Enter 'config'			to configure the Genetic Algorithm Parameters");

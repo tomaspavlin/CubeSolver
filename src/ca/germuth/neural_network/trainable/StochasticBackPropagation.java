@@ -51,6 +51,8 @@ public class StochasticBackPropagation {
 			if (testingError <= ERROR_THRESHOLD) {
 				return testingError;
 			}
+			System.out.printf("Epoch: %d/%d\n", epoch, TRAINING_EPOCHS);
+			System.out.printf("Error: %f/%f\n", testingError, ERROR_THRESHOLD);
 		}
 		return Integer.MAX_VALUE;
 	}
