@@ -27,14 +27,39 @@ public class StochasticBackPropagation {
 		double MINIMUM_ERROR = Integer.MAX_VALUE;
 
 		for (int epoch = 0; epoch < TRAINING_EPOCHS; epoch++) {
+			trainable.randomizeAllEdgeWeights();
 			train(trainable, trainingData);
 			double testingError = testError(trainable, testingData);
 
 			if (testingError < MINIMUM_ERROR) {
 				MINIMUM_ERROR = testingError;
 			}
+			
+			System.out.printf("Epoch: %d/%d\n", epoch, TRAINING_EPOCHS);
+			System.out.printf("Error: %f\n", testingError);
 		}
 		return MINIMUM_ERROR;
+	}
+	
+	public static double runOld(Trainable trainable, ArrayList<TrainingData> trainingData,
+			ArrayList<TrainingData> testingData, double learningRate, int trainingIterations, int trainingEpoch) {
+		LEARNING_RATE = learningRate;
+		TRAINING_ITERATIONS = trainingIterations;
+		TRAINING_EPOCHS = trainingEpoch;
+
+		double testingError = 0;
+		
+		System.out.printf("Training old nn with error %f\n", testError(trainable, testingData));
+		
+		for (int epoch = 0; epoch < TRAINING_EPOCHS; epoch++) {
+			train(trainable, trainingData);
+			
+			testingError = testError(trainable, testingData);
+			
+			System.out.printf("Epoch: %d/%d\n", epoch, TRAINING_EPOCHS);
+			System.out.printf("Error: %f\n", testingError);
+		}
+		return testingError;
 	}
 
 	public static double runForThreshold(Trainable trainable, ArrayList<TrainingData> trainingData,
@@ -46,6 +71,7 @@ public class StochasticBackPropagation {
 		TRAINING_EPOCHS = trainingEpoch;
 		
 		for (int epoch = 0; epoch < TRAINING_EPOCHS; epoch++) {
+			trainable.randomizeAllEdgeWeights();
 			train(trainable, trainingData);
 			double testingError = testError(trainable, testingData);
 			if (testingError <= ERROR_THRESHOLD) {
@@ -59,7 +85,7 @@ public class StochasticBackPropagation {
 
 	private static void train(Trainable trainable, ArrayList<TrainingData> trainingData){
 		// randomly initialize nn
-		trainable.randomizeAllEdgeWeights();
+		
 		for (int trainingIter = 0; trainingIter < TRAINING_ITERATIONS; trainingIter++) {
 			//randomly select one from training data, and change edge weights to reduce error 
 			alterEdgeWeights(trainable, trainingData.get(rng.nextInt(trainingData.size())));
@@ -185,17 +211,21 @@ public class StochasticBackPropagation {
 	private static double testError(Trainable trainable, ArrayList<TrainingData> testingData) {
 		// calculate network error across testing data
 		double testingError = 0;
+		int outputC = 0;
 		for (TrainingData test : testingData) {
 			// convert training data to scaled input/output, ie -> [-1, 1]
 			double[] inputs = trainable.getSolvable().mapTrainingInput(test.getInput());
 			double[] expectedOutput = trainable.getSolvable().mapTrainingOutput(test.getOutput());
 			double[] actualOutput = trainable.feedForward(inputs);
-
+			outputC = actualOutput.length;	
+			
 			for (int i = 0; i < actualOutput.length; i++) {
-				testingError += Math.pow(expectedOutput[i] - actualOutput[i], 2);
+				int mul = expectedOutput[i] == 1 ? 5 : 1;
+				
+				testingError += Math.pow(expectedOutput[i] - actualOutput[i], 2) * mul;
 			}
 		}
-		testingError /= 2;
+		testingError /= testingData.size() * 10;
 		return testingError;
 	}
 	

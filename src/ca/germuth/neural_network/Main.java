@@ -58,12 +58,18 @@ import ca.germuth.neural_network.trainable.TrainingData;
 public class Main {
 	final static int PIXEL_WIDTH = 480;
 	final static String CONF_FILENAME = "config.conf";
+	static int NUM_INPUT;
+	final static int NUM_OUTPUT = 6 * 2;
+	
 	
 	private static Cube cube;
 	private static NeuralNetwork nn;
 	private static String nnType;
 	
-	private static int CUBE_SIZE = 2;
+	
+	private static int CUBE_SIZE;
+	private static int TRAINDATA_MAX_MOVES;
+	private static int TRAINDATA_COUNT_FOR_EACH;
 	
 	public static void main(String[] args) {
 		Conf.load(CONF_FILENAME);
@@ -78,21 +84,28 @@ public class Main {
 		FileHandler.TRAINING_DATA_FILE_NAME = Conf.s("TRAINING_DATA_FILE_NAME");
 		FileHandler.SAVED_NEURAL_NETWORK_FILE_NAME = Conf.s("SAVED_NEURAL_NETWORK_FILE_NAME");
 		
+		TRAINDATA_MAX_MOVES = Conf.i("TRAINDATA_MAX_MOVES");
+		TRAINDATA_COUNT_FOR_EACH = Conf.i("TRAINDATA_COUNT_FOR_EACH");
+		
 		CUBE_SIZE = Conf.i("CUBE_SIZE");
+		NUM_INPUT = 6 * 6 * CUBE_SIZE * CUBE_SIZE;
+		
+		double learn_rate = Conf.f("LEARNING_RATE");
+		int train_iter = Conf.i("TRAINING_ITERATIONS");
+		int train_epoch= Conf.i("TRAINING_EPOCHS");
 		
 		Scanner s = new Scanner(System.in);
 		Scanner lineScanner;
 		printOptions();
 		
 		String inputLine = s.nextLine().trim();
+		String type;
 		
 		while(!inputLine.equals("quit")){	
 			lineScanner = new Scanner(inputLine);
 			switch(lineScanner.next().toLowerCase()){
 				case "create":
 					createNeuralNetwork(lineScanner.next(), s); break;
-				case "evolve":
-					evolveNeuralNetworks(); break;
 				case "solve":
 					solveCube(); break;
 				case "unit":
@@ -104,18 +117,19 @@ public class Main {
 						System.out.println("You have not created a neural network");
 						break;
 					}
-					String type = nn.getSolvable() instanceof XOR ? "XOR": "CUBE";
-					if(type.equals("XOR")){
-						System.out.println("Please Enter Error Threshold (Recommended: 0.05):");						
-					} else { 
-						System.out.println("Please Enter Error Threshold (Recommended: 200):");
-					}
+					type = nn.getSolvable() instanceof XOR ? "XOR": "CUBE";
+
 					
-					double error_thres = s.nextDouble();
-					double learn_rate = Conf.f("LEARNING_RATE");
-					int train_iter = Conf.i("TRAINING_ITERATIONS");
-					int train_epoch= Conf.i("TRAINING_EPOCHS");
-					trainNeuralNetwork(type, error_thres, learn_rate, train_iter, train_epoch);
+					trainNeuralNetwork(type, learn_rate, train_iter, train_epoch);
+					break;
+				case "trainold":
+					if(nn == null){
+						System.out.println("You have not created a neural network");
+						break;
+					}
+					type = nn.getSolvable() instanceof XOR ? "XOR": "CUBE";
+
+					trainOldNeuralNetwork(type, learn_rate, train_iter, train_epoch);
 					break;
 				case "test":
 					testNeuralNetwork(s); break;
@@ -130,6 +144,7 @@ public class Main {
 				case "load":
 					nnType = lineScanner.next();
 					nn = FileHandler.readNeuralNetwork(nnType); 
+					
 					if(nnType.equals("XOR")){
 						nn.setSolveable(new XOR());
 					}else{
@@ -150,14 +165,17 @@ public class Main {
 					experimentD(); break;
 				case "experimente":
 					experimentE(); break;
+				case "quit":
+					System.exit(0); break;
+
 				case "help":
 					System.out.println("There are 6 sides on a cube. Up, Down, Front, Back, Left, and Right");
 					System.out.println("The default turn around these faces is clockwise. Adding a ' reverses this");
 					System.out.println("A number can be prepended to turn the inner slices rather than the outer slices");
 					System.out.println("Therefore \"2R'\" turns the second slice on the right hand side of a 4x4 clockwise");
+					
+					printOptions();
 					break;
-				case "quit":
-					System.exit(0); break;
 			}
 			
 			inputLine = s.nextLine().trim();
@@ -181,38 +199,13 @@ public class Main {
 		}
 		if(type.equals("CUBE")){
 			createCube(CUBE_SIZE);
-			nn = new NeuralNetwork(cube, 4*6*3, 4, sizes.length, sizes);
+			nn = new NeuralNetwork(cube, NUM_INPUT, NUM_OUTPUT, sizes.length, sizes);
 			nnType = "CUBE";
 		}else{
 			nn = new NeuralNetwork(new XOR(), 2, 1, sizes.length, sizes);
 			nnType = "XOR";
 		}
 		System.out.println("Neural Network Created");
-	}
-	
-	private static void evolveNeuralNetworks(){
-		//TODO NOT JUST XOR
-		ArrayList<TrainingData> training = FileHandler.readTrainingData("XOR");
-		
-		ArrayList<Evolvable> list = new ArrayList<Evolvable>();
-		int[] hiddenNodes = {2};
-		for(int i = 0; i < GeneticAlgorithm.getPOPULATION_SIZE(); i++){
-			EvolvableNeuralNetwork next;
-			if(nn == null){
-				next = new EvolvableNeuralNetwork(new XOR(), 2, 1, 1, hiddenNodes);
-			}else{
-				next = new EvolvableNeuralNetwork(new XOR(), 2, 1, nn.getNumLayers() - 2, nn.hiddenLayerSizes());
-			}
-			next.randomizeAllEdgeWeights();
-			next.calcFitness(training);
-			list.add(next);
-		}
-		
-		EvolvableNeuralNetwork evolved = (EvolvableNeuralNetwork) GeneticAlgorithm.run(list, training);
-		evolved.toNetwork();
-		nn = evolved;
-		System.out.println("Evolution Complete");
-		
 	}
 	
 
@@ -223,10 +216,10 @@ public class Main {
 		ArrayList<TrainingData> lines = new ArrayList<TrainingData>();
 		if (type.equals("CUBE")) {
 			HashMap<String, Boolean> visited = new HashMap<String, Boolean>();
-			for (int k = 1; k < 8; k++) {
-				for (int i = 0; i < 50; i++) {
+			for (int k = 1; k <= TRAINDATA_MAX_MOVES; k++) {
+				for (int i = 0; i < TRAINDATA_COUNT_FOR_EACH; i++) {
 
-					System.out.printf("Training cube (%d/%d, %d/%d)\n", k, 8, i, 50);
+					System.out.printf("Training cube (%d/%d, %d/%d)\n", k, TRAINDATA_MAX_MOVES, i + 1, TRAINDATA_COUNT_FOR_EACH);
 					Cube experimentCube = new Cube(CUBE_SIZE);
 					experimentCube.scrambleCube(k);
 					if (experimentCube.isSolved()) {
@@ -257,58 +250,70 @@ public class Main {
 		System.out.println("Done creating training data");
 	}
 
-	private static void trainNeuralNetwork(String type, double ERROR_THRESHOLD, double LEARN_RATE,
+	private static void trainNeuralNetwork(String type, double LEARN_RATE,
 			int train_iter, int train_epoch){
 		ArrayList<TrainingData> training = FileHandler.readTrainingData(type);
 		ArrayList<TrainingData> testing = FileHandler.readTrainingData(type);
 
-		double err = StochasticBackPropagation.runForThreshold(nn, training, testing, ERROR_THRESHOLD, 
+		double err = StochasticBackPropagation.runForMinimum(nn, training, testing, 
 				LEARN_RATE, train_iter, train_epoch);
-		if(err < ERROR_THRESHOLD){
-			System.out.println("Neural Network Trained Successfully with " + err + " error");
-		}else{
-			System.out.println("Neural Network Trained UnSuccessfully with " + err + " error");
-		}
+		
+		System.out.println("Neural Network Trained Successfully with " + err + " error");
+
+	}
+	
+	private static void trainOldNeuralNetwork(String type, double LEARN_RATE,
+			int train_iter, int train_epoch){
+		ArrayList<TrainingData> training = FileHandler.readTrainingData(type);
+		ArrayList<TrainingData> testing = FileHandler.readTrainingData(type);
+
+		double err = StochasticBackPropagation.runOld(nn, training, testing, 
+				LEARN_RATE, train_iter, train_epoch);
+		
+		System.out.println("Neural Network Trained Successfully with " + err + " error");
 	}
 	
 	private static void testNeuralNetwork(Scanner scan){
 		Random r = new Random();
-		while(true){
+		
+		if(nn.getSolvable() instanceof Cube){
+			int moves = r.nextInt(TRAINDATA_MAX_MOVES) + 1;
+			cube.scrambleCube(moves);
+			System.out.println("Cube scrumbled with " + moves + " moves.");
 			
-			if(nn.getSolvable() instanceof Cube){
-				int moves = r.nextInt(3) + 1;
-				cube.scrambleCube(moves);
-				System.out.println("Cube scrumbled with " + moves + " moves.");
+			while(!cube.isSolved()){
+				String cubeState = cube.getKey().replaceAll(" |,|\\[|\\]", "");
+				double[] moveArr = nn.feedForward( cube.mapTrainingInput(cubeState) );
+
+				String move = cube.getMoveString(moveArr);
+				String moveLong = cube.getMoveLongString(moveArr);
 				
-				while(!cube.isSolved()){
-					String cubeState = cube.getKey().replaceAll(" |,|\\[|\\]", "");
-					double[] moveArr = nn.feedForward( cube.mapTrainingInput(cubeState) );
-					
-					String move = cube.getMoveString(moveArr);
-					System.out.println("Neural Network Says " + move);
-					System.out.println("Would you like to perform this move (Y/N)");
-					
-					String resp = scan.nextLine().trim().toUpperCase();
-					if(!resp.equals("Y") && !resp.isEmpty()){
-						break;
-					} else{
-						cube.turn(move);						
-					}
+				System.out.println("Neural Network Says: \n" + moveLong);
+				System.out.println("What move to perform (" + move + "). Type Q to exit.");
+				
+				String resp = scan.nextLine().trim().toUpperCase();
+				if(resp.equals(""))
+					resp = move;
+				
+				if(resp.equals("Q")){
+					break;
+				} else{
+					cube.turn(resp);						
 				}
-			}else{
-				System.out.println("Enter an input (for ex. -1 1)");
-				double[] input = new double[2];
-				input[0] = scan.nextDouble();
-				input[1] = scan.nextDouble();
-				double[] move = nn.feedForward(input);
-				System.out.println("Neural Network Says " + move[0]);
 			}
 			
-			System.out.println("Try again? (Y/N)");
-			if(!scan.next().trim().toUpperCase().equals("Y")){
-				break;
+			if(cube.isSolved()){
+				System.out.println("Solved!!!");
 			}
+		}else{
+			System.out.println("Enter an input (for ex. -1 1)");
+			double[] input = new double[2];
+			input[0] = scan.nextDouble();
+			input[1] = scan.nextDouble();
+			double[] move = nn.feedForward(input);
+			System.out.println("Neural Network Says " + move[0]);
 		}
+		
 		if(cube != null){
 			cube.setSolved();
 		}

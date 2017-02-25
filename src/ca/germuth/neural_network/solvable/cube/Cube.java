@@ -324,6 +324,7 @@ public class Cube implements Searchable, Solvable {
 					Arrays.deepToString(this.right) + //red
 					Arrays.deepToString(this.up) + //white
 					Arrays.deepToString(this.down); //yellow
+			
 		}
 		return key;
 	}
@@ -378,40 +379,58 @@ public class Cube implements Searchable, Solvable {
 
 	@Override
 	public double[] mapTrainingInput(String trainInput) {
-		double[] input = new double[trainInput.length() * 3];
+		double[] input = new double[trainInput.length() * 6];
 		int inputIndex = 0;
 		for(int ch = 0; ch < trainInput.length(); ch++){
 			char curr = trainInput.charAt(ch);
 			switch(curr){
 				case 'W':
+					input[inputIndex++] = 1.0;
+					input[inputIndex++] = -1.0;
+					input[inputIndex++] = -1.0;
 					input[inputIndex++] = -1.0;
 					input[inputIndex++] = -1.0;
 					input[inputIndex++] = -1.0;
 					break;
 				case 'B':
 					input[inputIndex++] = -1.0;
+					input[inputIndex++] = 1.0;
 					input[inputIndex++] = -1.0;
-					input[inputIndex++] =  1.0;
+					input[inputIndex++] = -1.0;
+					input[inputIndex++] = -1.0;
+					input[inputIndex++] = -1.0;
 					break;
 				case 'R':
 					input[inputIndex++] = -1.0;
-					input[inputIndex++] =  1.0;
+					input[inputIndex++] = -1.0;
+					input[inputIndex++] = 1.0;
+					input[inputIndex++] = -1.0;
+					input[inputIndex++] = -1.0;
 					input[inputIndex++] = -1.0;
 					break;
 				case 'G':
 					input[inputIndex++] = -1.0;
-					input[inputIndex++] =  1.0;
-					input[inputIndex++] =  1.0;
+					input[inputIndex++] = -1.0;
+					input[inputIndex++] = -1.0;
+					input[inputIndex++] = 1.0;
+					input[inputIndex++] = -1.0;
+					input[inputIndex++] = -1.0;
 					break;
 				case 'Y':
-					input[inputIndex++] =  1.0;
 					input[inputIndex++] = -1.0;
+					input[inputIndex++] = -1.0;
+					input[inputIndex++] = -1.0;
+					input[inputIndex++] = -1.0;
+					input[inputIndex++] = 1.0;
 					input[inputIndex++] = -1.0;
 					break;
 				case 'O':
-					input[inputIndex++] =  1.0;
 					input[inputIndex++] = -1.0;
-					input[inputIndex++] =  1.0;
+					input[inputIndex++] = -1.0;
+					input[inputIndex++] = -1.0;
+					input[inputIndex++] = -1.0;
+					input[inputIndex++] = -1.0;
+					input[inputIndex++] = 1.0;
 					break;
 				default:
 					throw new IllegalArgumentException("Training input contains unknown character");
@@ -422,45 +441,40 @@ public class Cube implements Searchable, Solvable {
 
 	@Override
 	public double[] mapTrainingOutput(String trainOutput) {
-		double[] moves = new double[4];
+		double[] moves = new double[12];
 		int index = 0;
+		
 		switch(trainOutput.trim().charAt(0)){
 			case 'R':
-				moves[index++] = -1.0;
-				moves[index++] = -1.0;
-				moves[index++] = -1.0;
+				index = 0;
 				break;
 			case 'L':
-				moves[index++] =  1.0;
-				moves[index++] = -1.0;
-				moves[index++] = -1.0;
+				index = 1;
 				break;
 			case 'U':
-				moves[index++] = -1.0;
-				moves[index++] =  1.0;
-				moves[index++] = -1.0;
+				index = 2;
 				break;
 			case 'D':
-				moves[index++] =  1.0;
-				moves[index++] =  1.0;
-				moves[index++] = -1.0;
+				index = 3;
 				break;
 			case 'F':
-				moves[index++] = -1.0;
-				moves[index++] = -1.0;
-				moves[index++] =  1.0;
+				index = 4;
 				break;
 			case 'B':
-				moves[index++] =  1.0;
-				moves[index++] = -1.0;
-				moves[index++] =  1.0;
+				index = 5;
 				break;
 				
 		}
 		if(trainOutput.contains("'")){
-			moves[index++] = -1.0;
-		}else{
-			moves[index++] = 1.0;
+			index += 6;
+		}
+		
+		for(int i = 0; i < 12; i++){
+			if(index == i){
+				moves[i] = 1;
+			} else {
+				moves[i] = -1;
+			}
 		}
 		return moves;
 	}
@@ -474,33 +488,32 @@ public class Cube implements Searchable, Solvable {
 	}
 	
 	public String getMoveString(double[] output) {
-		double first = output[0];
-		double second = output[1];
-		double third = output[2];
-		double fourth = output[3];
-
-		int bitArray = round(first);
-		bitArray += round(second) * 2;
-		bitArray += round(third) * 4;
-		boolean reversed = round(fourth) == 1 ? false : true;
-
-		String move = null;
-		switch (bitArray) {
-			case 0 : move = "R"; break;
-			case 1: move = "L"; break;
-			case 2: move = "U"; break;
-			case 3: move = "D"; break;
-			case 4: move = "F"; break;
-			case 5: move = "B"; break;
-			default:
-//				throw new IllegalArgumentException("Output did not map to one of 6 moves");
-				System.out.println("neural network has no idea whats its doing");
-				move = "U";
+		double max = -1;
+		int maxI = 0;
+		
+		int i = 0;
+		for(double w: output){
+			if(w > max){
+				maxI = i;
+				max = w;
+			}
+			i++;			
 		}
 
-		if (reversed) {
-			move += "'";
-		}
+		String[] moves = {"R","L","U","D","F","B","R'","L'","U'","D'","F'","B'"};
+		String move = moves[maxI];
+	
 		return move;
+	}
+	
+	public String getMoveLongString(double[] output) {
+		String[] moves = {"R","L","U","D","F","B","R'","L'","U'","D'","F'","B'"};
+		
+		StringBuilder ret = new StringBuilder();
+		for(int i = 0; i < moves.length; i++){
+			ret.append(Math.round(output[i] * 50 + 50) + "% : " + moves[i] + "\n");
+		}
+		
+		return ret.toString();
 	}
 }
