@@ -126,9 +126,12 @@ public class Main {
 					
 					if(nnType.equals("XOR")){
 						nn.setSolveable(new XOR());
-					}else{
+					}else if(nnType.equals("CUBE")){
 						createCube(CUBE_SIZE);
 						nn.setSolveable(cube);
+					} else {
+						printHelp();
+						break;
 					}
 					System.out.println("Loaded successfully");
 					break;
