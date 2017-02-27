@@ -358,17 +358,25 @@ public class Main {
 		System.out.println(" | |__| |_| | |_) |  __/___) | (_) | |\\ V /  __/ |    ");
 		System.out.println("  \\____\\__,_|_.__/ \\___|____/ \\___/|_| \\_/ \\___|_|    ");
 		System.out.println("                                                      ");
-		System.out.println("Enter 'traindata (XOR|CUBE)'	to create training data");
-		System.out.println("Enter 'create (XOR|CUBE)'		to create a neural network");
-
-		System.out.println("Enter 'load (XOR|CUBE)'		to load an neural network from file");
-		System.out.println("Enter 'save'			to save current neural network to XORNeuralNetwork.csv");
+		System.out.println("Neural network basics commands:");
+		System.out.println(" create (XOR|CUBE)      Create a new neural network");
+		System.out.println(" load (XOR|CUBE)        Load an neural network from file");
+		System.out.println(" save                   Save the current neural network into the file");
+		System.out.println();
 		
-		System.out.println("Enter 'trainbest'			to train many neural networks and use best");
-		System.out.println("Enter 'train'			to train current neural network");
-		System.out.println("Enter 'solve'			to test the current neural network");
-		System.out.println("Enter 'help' 			to receive this help");
-		System.out.println("Enter 'quit' 			to quit the program");
+		System.out.println("Training neural network commands:");		
+		System.out.println(" traindata (XOR|CUBE)   Generate training data");
+		System.out.println(" trainbest              Train many neural networks and use the best");
+		System.out.println(" train                  Train current neural network");
+		System.out.println();
+
+		System.out.println("Solving cube using the neural network command:");
+		System.out.println(" solve                  Solve the cube using the neural network,");
+		System.out.println("                        that must to be created or loaded already");
+		System.out.println();
+		
+		System.out.println(" help                   Show this help");
+		System.out.println(" quit                   Quit CubeSolver");
 	}
 	
 }
