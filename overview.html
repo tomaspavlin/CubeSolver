@@ -1,0 +1,34 @@
+<body>
+
+<h1>Developer documentation</h1>
+
+The program solves a Rubic cube of any size with a neural network.
+
+<h2>Neural network</h2>
+
+<h3>Input neurons</h3>
+The input to the neural network is all the cube's stickers. E.g. for 3x3x3 cube, we have 9*6 = 45 stickers. There are 6 colors for each sticker (blue, red, orange, green, white and yellow). Although each color can be coded using 3 input neurons corresponding to 3 bits, we choosed 6 input neurons for each color, due to the neural network's better performance.
+
+Each of the six input neurons corresponds to one color. The neuron, that corresponds to the stickers color has value 1, other 5 neurons has value -1. Therefore, for the cube of size 3x3x3, we have 45 * 6 = 270 input neurons.
+
+<h3>Computation</h3>
+The user can customize the number of hidden layers and a number of each layers neurons.
+
+We input current state of the cube to the neural network and the network's output corresponds to the correct move. The solution of solving the cube concists of more moves, that is more computations on the neural network.
+
+<h3>Output neurons</h3>
+Although the cube size is customizable, the output neurons of the neural network and their representation are both optimized for 3x3x3 cube.
+
+There are 6 faces of the cube and each face can turn in one of two ways. It makes 6 different moves that corresponds to 12 output neurons. Each face is represented using one of the letters R, L, T, D, F, B. The clockwise move of the face is represented using the respective letter (e.g. L), the other wise move is represented using letter with suffix <i>'</i> (e.g. L').
+
+<h2>Training</h2>
+In order to train the network to solve the cube, we have to generate training data first. These data are represented in a file and are computed using modified breadth-first search to compute the propriat move.
+
+Using the generated training data, the network is trained using stochastic back propagation. The error function is the avarage value of the squared difference between the expected and actual output.
+
+<h2>Graphics</h2>
+For the reason, that textual representation of the cube would be not easy to understand, the rubic cube is displayed using JOGL library, which is Java binding into openGL, that is inspired by
+<a href="https://sourceforge.net/projects/jogl-rubik-cube/">JOGL-rubik-cube project on SourcForge</a>.
+
+
+</body>
