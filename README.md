@@ -54,7 +54,7 @@ Generates file contating training data that are used later in *trainbest* and *t
 Creates and trains many neural network of the type as the loaded or creating network has (cube or xor, number of hidden neurons and layers) and chooses the best one. Parameters of the training can be configured (see Configuration). The training is accomplihed using stochastic back propagation.
 
 #### train
-This command is best to use with already trained network and it trains it more using stochastic back propagation algorithm. It can be also configured (see [Configuration](#Configuration)).
+This command is best to use with already trained network and it trains it more using stochastic back propagation algorithm. It can be also configured (see [Configuration](#configuration)).
 
 #### solve
 After succesfully training neural network for computing xor operation or solving the cube, it is time to test it using only this command.
