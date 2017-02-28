@@ -3,11 +3,6 @@
 	<description>Project solving rubic cube using neural network</description>
 	<property name="src" location="src"/>
 	<property name="bin" location="bin"/>
-	<property name="lib" location="lib"/>
-
-	<path id="jars">
-		<fileset dir="${lib}" includes="**/*.jar" />
-	</path>
 
 	<target name="clean">
 		<delete dir="${bin}" />
@@ -19,13 +14,12 @@
 
 	<target name="compile" depends="init" description="Compile">
 		<echo message="Compiling..." />
-		<javac debug="true" destdir="${bin}" srcdir="${src}" classpath="${bin}" classpathref="jars">
-			<!--<src path="${src}" />-->
+		<javac debug="true" destdir="${bin}" srcdir="${src}" classpath="${bin}">
 		</javac>
 	</target>
 
 	<target name="run" depends="init,compile" description="Execute">
-		<java fork="true" classname="com.tomas.cubesolver.main.Main" classpath="${bin}" classpathref="jars" />
+		<java fork="true" classname="com.tomas.cubesolver.main.Main" classpath="${bin}" />
 	</target>
 
 

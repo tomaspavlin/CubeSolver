@@ -1,8 +1,7 @@
 #!/bin/bash
 
-command="java -cp bin:\
-lib/jogamp-all-platforms/jar/jogl-all.jar:\
-lib/jogamp-all-platforms/jar/gluegen-rt.jar \
+command="java -cp bin \
 com.tomas.cubesolver.main.Main"
 
-rlwrap $command
+#rlwrap $command
+$command

@@ -1,22 +1,16 @@
 package com.tomas.cubesolver.main;
 
-import java.awt.BorderLayout;
 import java.util.*;
 
-import com.jogamp.opengl.GLCapabilities;
-import com.jogamp.opengl.GLProfile;
 import com.tomas.cubesolver.bfs.BFSearcher;
 import com.tomas.cubesolver.bfs.Node;
 import com.tomas.cubesolver.cube.Cube;
 import com.tomas.cubesolver.cube.CubePrinter;
 import com.tomas.cubesolver.cube.XOR;
-import com.tomas.cubesolver.graphics.CubeCanvas;
 import com.tomas.cubesolver.neuralnetwork.BackPropagation;
 import com.tomas.cubesolver.neuralnetwork.NN;
 import com.tomas.cubesolver.neuralnetwork.TrainData;
 import com.tomas.cubesolver.utils.FileUtils;
-
-import javax.swing.JFrame;
 
 /**
  * This class is an entry point for the CubeSolver.
@@ -24,7 +18,6 @@ import javax.swing.JFrame;
  */
 
 public class Main {
-	final static int PIXEL_WIDTH = 480;
 	final static String CONF_FILENAME = "config.conf";
 	static int NUM_INPUT;
 	final static int NUM_OUTPUT = 6 * 2;
@@ -331,22 +324,6 @@ public class Main {
 	 */
 	private static void createCube(int size){
 		cube = new Cube(size);
-		GLProfile glprofile = GLProfile.getDefault();
-        GLCapabilities capabilities = new GLCapabilities( glprofile );
-        CubeCanvas rd = new CubeCanvas(capabilities, PIXEL_WIDTH, PIXEL_WIDTH, cube);
-
-        final JFrame jframe = new JFrame( "Rubik's Cube Simulator" ); 
-        jframe.setResizable(false);
-        jframe.getContentPane().add( rd, BorderLayout.CENTER);
-        jframe.setSize( PIXEL_WIDTH, PIXEL_WIDTH );
-        jframe.setVisible( true );
-        java.awt.EventQueue.invokeLater(new Runnable(){
-        	@Override
-        	public void run(){
-        		jframe.toFront();
-        		jframe.repaint();
-        	}
-        });
 	}
 	
 	/**
