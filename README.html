@@ -1,0 +1,70 @@
+<h1 id="cubesolver">CubeSolver</h1>
+<p>The program CubeSolver is an example of neural network used for solving Rubik's Cube of generic size programmed in Java. Its features includes creating of neural network with any number of hidden layers of any number of input neurons, training the neural network using stochastic back propagation algorithm and it can also test the trained neural network.</p>
+<p>This document is user documentation of the program. For technical documentation, run <strong>ant doc</strong> and look into created <strong>javadoc</strong> directory.</p>
+<h2 id="compiling">Compiling</h2>
+<p>On Unix systems, simply navigate to project directory and run:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">&gt;</span> <span class="kw">ant</span> compile</code></pre></div>
+<p>The project can be also opened and compiled using Eclipse.</p>
+<h2 id="running">Running</h2>
+<p>On Unix systems, run bash script <em>run.sh</em>:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">&gt;</span> <span class="kw">./run.sh</span></code></pre></div>
+<h2 id="cli">CLI</h2>
+<p>After the start of the program, the help with available commands is displayed. Now we will provide an example how to use the program. Read the section <a href="#commands">Commands</a> section for all commands description.</p>
+<h3 id="example-usage">Example usage</h3>
+<p>If not changed, there is an default trained neural network that can solve 3x3x3 cube. We will use this network in this simple example.</p>
+<p>First, let's load the default neural network first. Type:</p>
+<pre><code>load CUBE</code></pre>
+<p>This will load the default neural network that can solve the cube.</p>
+<p>Secondly type:</p>
+<pre><code>solve</code></pre>
+<p>This command will shutter the cube using 1 to 5 moves (this number can be chaged, see <a href="#configuration">Configuration</a> section) and display the cube configuration into console (see <a href="#solve">Solve</a> section for more info). It computes the recommended move using the neural network and this move is performed by pressing <strong>enter</strong> (see <a href="#solve">Solve</a> section for more options). This repeats infinitely unless the cube is not solved. Although the program solves the cube in most cases, it does not solve it in every case. By that reason, it is possible to get out of the <a href="#solve">Solve</a> interface by typing <strong>Q</strong>.</p>
+<p>Try to perform the <em>solve</em> command several times and then type <strong>quit</strong> to quit the program.</p>
+<h3 id="commands">Commands</h3>
+<p>More detailed documentation on the commands user can type after starting the program follows.</p>
+<h4 id="create-xorcube">create (XOR|CUBE)</h4>
+<p>Creates a new neural network that can solve either Rubik's cube or XOR operation.</p>
+<p>Type <em>create XOR</em> for creating neural network for XOR operation and <em>create CUBE</em> for creating neural network that can solve Rubik's cube. Then you will be asked for choosing number of hidden neurons and hidden layers and the neural network will be created. This network will consist of random neuron weights and will not be trained yet.</p>
+<h4 id="load-xorcube">load (XOR|CUBE)</h4>
+<p>Loads saved neural network from file. The file name can be configured in configuration file (see <a href="#configuration">Configuration</a>). There is one default file for each of the XOR and CUBE type neural networks. Type one of <em>load XOR</em> or <em>load CUBE</em> to perform this command.</p>
+<h4 id="save">save</h4>
+<p>It checks the loaded or created neural network type (one of XOR or CUBE) and saves it to corresponding file which name can be configured (see <a href="#configuration">Configuration</a>). The network has to be loaded or created first.</p>
+<h4 id="traindata-xorcube">traindata (XOR|CUBE)</h4>
+<p>Generates file contating training data that are used later in <em>trainbest</em> and <em>train</em> commands. The train data for XOR are trivial and are generated automatically, the train data for cube are more complex and parameters can be changed in configuration file (see <a href="#configuration">Configuration</a>).</p>
+<h4 id="trainbest">trainbest</h4>
+<p>Creates and trains many neural network of the type as the loaded or creating network has (cube or xor, number of hidden neurons and layers) and chooses the best one. Parameters of the training can be configured (see Configuration). The training is accomplihed using stochastic back propagation.</p>
+<h4 id="train">train</h4>
+<p>This command is best to use with already trained network and it trains it more using stochastic back propagation algorithm. It can be also configured (see <a href="#configuration">Configuration</a>).</p>
+<h4 id="solve">solve</h4>
+<p>After succesfully training neural network for computing xor operation or solving the cube, it is time to test it using only this command.</p>
+<p>If the neural network is for computing xor operation, it asks for input and prints computed output. If the network is for solving cube, the behaviour is following.</p>
+<p>It scruble new plain Rubik's cube with random number of moves (the highest number can be configured, see <a href="#configuration">Configuration</a>), and displays the cube configuration to console.</p>
+<p>The 3D cube is represented using it's 2D network. An example of 3x3x3 cube representation follows:</p>
+<pre><code>          R G G         
+          B B R         
+          O O O         
+
+  W O G   W W W   B Y O 
+  B O G   W W W   B R O 
+  B O G   W W G   R R Y 
+
+          R R Y         
+          G G G         
+          O B B         
+
+          Y R R         
+          Y Y Y         
+          B Y Y </code></pre>
+<p>The letters corresponds to the stickers colors (red, green, blue, orange, yellow and white) and they group into the 6 cube edges as:</p>
+<pre><code>     back
+left  up  right
+     front
+     down</code></pre>
+<p>There are 6 faces on the cube, each face can be rotated in 2 directions so it makes 12 movements we can do in every solving step. Although the cube size can be configured, the number of these movements is most reasonable for 3x3, maybe 2x2 cubes. These 12 movements are noted using the letter characterizing cube face (R,L,U,D,F,B) and sufixed with apostroph for counter clock wise movements. It means we have these movements: R, L, U, D, F, B, R', L', U', D', F' and B'. This notation is commonly used in Rubik's cube solving community.</p>
+<p>The neural network express confidence using each movement in percents when the best confidence has most percents. These percents are displayed and the movement with the biggest confidence is reccomended to user. The user can then apply this recommendation just by pressing <strong>enter</strong> or choosing different movement by <strong>typing its name</strong>.</p>
+<p>The same procedure as described is repeaded util the cube is solved or until the solve command is quited by typing <strong>Q</strong>.</p>
+<h4 id="help">help</h4>
+<p>Displays help.</p>
+<h4 id="quit">quit</h4>
+<p>Exits program.</p>
+<h2 id="configuration">Configuration</h2>
+<p>The commands above can be configured in the file <strong>config.conf</strong>. The file is well commented.</p>
