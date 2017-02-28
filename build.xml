@@ -3,6 +3,7 @@
 	<description>Project solving rubic cube using neural network</description>
 	<property name="src" location="src"/>
 	<property name="bin" location="bin"/>
+	<property name="doc" location="javadoc"/>
 
 	<target name="clean">
 		<delete dir="${bin}" />
@@ -14,12 +15,17 @@
 
 	<target name="compile" depends="init" description="Compile">
 		<echo message="Compiling..." />
-		<javac debug="true" destdir="${bin}" srcdir="${src}" classpath="${bin}">
+		<javac target="1.8" source="1.8" debug="true" destdir="${bin}" srcdir="${src}" classpath="${bin}">
 		</javac>
 	</target>
 
 	<target name="run" depends="init,compile" description="Execute">
 		<java fork="true" classname="com.tomas.cubesolver.main.Main" classpath="${bin}" />
+	</target>
+
+	<target name="doc" description="Generate javadoc">
+		<javadoc sourcepath="${src}" destdir="${doc}" overview="overview.html" />
+		<echo message="Technical documentation saved in ${doc}" />
 	</target>
 
 

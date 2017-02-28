@@ -1,7 +1,7 @@
 # CubeSolver
 The program CubeSolver is an example of neural network used for solving Rubik's Cube of generic size programmed in Java. Its features includes creating of neural network with any number of hidden layers of any number of input neurons, training the neural network using stochastic back propagation algorithm and it can also test the trained neural network.
 
-This document is user documentation of the program. For technical documentation, run **gen-javadoc.sh** and look into created **javadoc** directory.
+This document is user documentation of the program. For technical documentation, run **ant doc** and look into created **javadoc** directory.
 
 ## Compiling
 On Unix systems, simply navigate to project directory and run:
