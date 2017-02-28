@@ -29,12 +29,12 @@ public class Cube implements Search, Solve {
 	}
 
 	private int size;
-	private Color[][] up;
-	private Color[][] front;
-	private Color[][] left;
-	private Color[][] right;
-	private Color[][] down;
-	private Color[][] back;
+	public Color[][] up;
+	public Color[][] front;
+	public Color[][] left;
+	public Color[][] right;
+	public Color[][] down;
+	public Color[][] back;
 	private String moveTaken;
 	
 	private String key = null;
@@ -537,4 +537,6 @@ public class Cube implements Search, Solve {
 		
 		return ret.toString();
 	}
+	
+	
 }

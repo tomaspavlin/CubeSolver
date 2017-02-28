@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 
 command="java -cp bin:\
 lib/jogamp-all-platforms/jar/jogl-all.jar:\

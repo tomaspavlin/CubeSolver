@@ -8,6 +8,7 @@ import com.jogamp.opengl.GLProfile;
 import com.tomas.cubesolver.bfs.BFSearcher;
 import com.tomas.cubesolver.bfs.Node;
 import com.tomas.cubesolver.cube.Cube;
+import com.tomas.cubesolver.cube.CubePrinter;
 import com.tomas.cubesolver.cube.XOR;
 import com.tomas.cubesolver.graphics.CubeCanvas;
 import com.tomas.cubesolver.neuralnetwork.BackPropagation;
@@ -106,7 +107,7 @@ public class Main {
 						System.out.println("You have not created or loaded a neural network yet");
 						break;
 					}
-					testNeuralNetwork(s); break;
+					solveNeuralNetwork(s); break;
 				case "save":
 					System.out.println("Saving");
 					if(nn != null){
@@ -257,7 +258,7 @@ public class Main {
 	 * Graphically test the nn network (for CUBE) or through CLI (for XOR)
 	 * @param scan User input scanner
 	 */
-	private static void testNeuralNetwork(Scanner scan){
+	private static void solveNeuralNetwork(Scanner scan){
 		Random r = new Random();
 		
 		if(nn.getSolvable() instanceof Cube){
@@ -266,13 +267,15 @@ public class Main {
 			System.out.println("Cube scrumbled with " + moves + " moves.");
 			
 			while(!cube.isSolved()){
+				CubePrinter.printCube(cube);
+				
 				String cubeState = cube.getKey().replaceAll(" |,|\\[|\\]", "");
 				double[] moveArr = nn.feedForward( cube.mapTrainingInput(cubeState) );
 
 				String move = cube.getMoveString(moveArr);
 				String moveLong = cube.getMoveLongString(moveArr);
 				
-				System.out.println("Neural Network Says: \n" + moveLong);
+				System.out.println("Neural network recommends: \n" + moveLong);
 				System.out.println("What move to perform (" + move + "). Type Q to exit.");
 				
 				String resp = scan.nextLine().trim().toUpperCase();
@@ -287,6 +290,8 @@ public class Main {
 			}
 			
 			if(cube.isSolved()){
+
+				CubePrinter.printCube(cube);
 				System.out.println("Solved!!!");
 			}
 		}else{
@@ -380,6 +385,8 @@ public class Main {
 		
 		System.out.println(" help                   Show this help");
 		System.out.println(" quit                   Quit CubeSolver");
+		System.out.println();
+		System.out.println("What command you want to perform?");
 	}
 	
 }
