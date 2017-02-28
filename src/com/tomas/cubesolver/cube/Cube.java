@@ -162,10 +162,10 @@ public class Cube implements Search, Solve {
 	/**
 	 * Performs a turn based a string sequence of moves
 	 */
-	public void turn(String moveSequence){
+	public boolean turn(String moveSequence){
 		String[] moves = moveSequence.split(" ");
 		for(String move: moves){
-			Direction d = move.endsWith("\'") ? Direction.CCW : Direction.CW;
+			Direction d = move.endsWith("\'") ? Direction.B : Direction.A;
 			Face f = null;
 			int depth;
 			char currChar = move.charAt(0);
@@ -189,10 +189,13 @@ public class Cube implements Search, Solve {
 				case 'B': f = Face.BACK; break;
 				case 'L': f = Face.LEFT; break;
 				case 'R': f = Face.RIGHT; break;
+				default:
+					return false;
 			}
 			
 			this.turn(f, d, depth);			
 		}
+		return true;
 		
 	}
 	
@@ -201,7 +204,7 @@ public class Cube implements Search, Solve {
 	 */
 	public void turn(Face move, Direction d, int depth){
 		//do 1 move if CW, 3 moves if CCW
-		int repeats = (d == Direction.CW) ? 1 : 3;
+		int repeats = (d == Direction.A) ? 1 : 3;
 		for (int i = 0; i < repeats; i++) {
 			switch (move) {
 				case LEFT : LTurn(depth); break;
@@ -212,7 +215,7 @@ public class Cube implements Search, Solve {
 				case BACK : BTurn(depth); break;
 			}
 		}
-		if(d == Direction.CCW){
+		if(d == Direction.B){
 			this.moveTaken += "'";
 		}
 		//key is no longer valid
@@ -313,7 +316,7 @@ public class Cube implements Search, Solve {
 	@Override
 	public ArrayList<Search> getChildren() {
 		ArrayList<Search> children = new ArrayList<Search>();
-		Direction[] directions = {Direction.CW, Direction.CCW};
+		Direction[] directions = {Direction.A, Direction.B};
 		Face[] faces = {Face.UP, Face.DOWN, Face.LEFT, Face.RIGHT, Face.FRONT, Face.BACK};
 		for(Face f: faces){
 			for(Direction d: directions){

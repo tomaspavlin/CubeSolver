@@ -10,7 +10,7 @@ import com.tomas.cubesolver.neuralnetwork.TrainData;
 /**
  * Handles writing and reading from files
  */
-public class FIleUtils {
+public class FileUtils {
 	public static String TRAINING_DATA_FILE_NAME = "noimplemented.csv";
 	public static String SAVED_NEURAL_NETWORK_FILE_NAME = "noimplemented.csv-nn.csv";
 	

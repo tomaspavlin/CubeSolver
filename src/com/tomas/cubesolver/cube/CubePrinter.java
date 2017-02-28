@@ -1,7 +1,5 @@
 package com.tomas.cubesolver.cube;
 
-import com.tomas.cubesolver.cube.*;
-
 /**
  * This class defines only one static method for printing cube as a string
  */

@@ -14,7 +14,7 @@ import com.tomas.cubesolver.graphics.CubeCanvas;
 import com.tomas.cubesolver.neuralnetwork.BackPropagation;
 import com.tomas.cubesolver.neuralnetwork.NN;
 import com.tomas.cubesolver.neuralnetwork.TrainData;
-import com.tomas.cubesolver.utils.FIleUtils;
+import com.tomas.cubesolver.utils.FileUtils;
 
 import javax.swing.JFrame;
 
@@ -47,8 +47,8 @@ public class Main {
 		Conf.load(CONF_FILENAME);
 		
 
-		FIleUtils.TRAINING_DATA_FILE_NAME = Conf.s("TRAINING_DATA_FILE_NAME");
-		FIleUtils.SAVED_NEURAL_NETWORK_FILE_NAME = Conf.s("SAVED_NEURAL_NETWORK_FILE_NAME");
+		FileUtils.TRAINING_DATA_FILE_NAME = Conf.s("TRAINING_DATA_FILE_NAME");
+		FileUtils.SAVED_NEURAL_NETWORK_FILE_NAME = Conf.s("SAVED_NEURAL_NETWORK_FILE_NAME");
 		
 		TRAINDATA_MAX_MOVES = Conf.i("TRAINDATA_MAX_MOVES");
 		TRAINDATA_COUNT_FOR_EACH = Conf.i("TRAINDATA_COUNT_FOR_EACH");
@@ -111,11 +111,11 @@ public class Main {
 				case "save":
 					System.out.println("Saving");
 					if(nn != null){
-						FIleUtils.writeNeuralNetwork(nn, (nn.getSolvable() instanceof XOR) ? "XOR": "CUBE");
+						FileUtils.writeNeuralNetwork(nn, (nn.getSolvable() instanceof XOR) ? "XOR": "CUBE");
+						System.out.println("Saved succesfully");
 					}else{
 						System.out.println("No current neural network");
 					}
-					System.out.println("Saved succesfully");
 					break;
 				case "load":
 					if(!lineScanner.hasNext()){
@@ -123,7 +123,7 @@ public class Main {
 						break;
 					}
 					nnType = lineScanner.next();
-					nn = FIleUtils.readNeuralNetwork(nnType); 
+					nn = FileUtils.readNeuralNetwork(nnType); 
 					
 					if(nnType.equals("XOR")){
 						nn.setSolveable(new XOR());
@@ -157,22 +157,31 @@ public class Main {
 	 * @param scan input scanner
 	 */
 	private static void createNeuralNetwork(String type, Scanner scan){
-		System.out.println("Please Enter Hidden Layer Config: ('12 12' makes two layers of size 12)");
-		System.out.println("Recommend 36 for Cube and 2 for XOR");
-		String[] strin = scan.nextLine().split(" ");
-		int[] sizes = new int[strin.length];
-		for(int i = 0; i < strin.length; i++){
-			sizes[i] = Integer.parseInt(strin[i]);
+		System.out.println("Configure hidden layer (e.g. '18;18' creates two hidden layers of 18 neurons.");
+		String[] s = scan.nextLine().split(";");
+		int[] sizes = new int[s.length];
+		for(int i = 0; i < s.length; i++){
+			try{
+				sizes[i] = Integer.parseInt(s[i]);
+			} catch(NumberFormatException e){
+				System.out.println("Invalid format");
+				printHelp();
+				return;
+			}
 		}
 		if(type.equals("CUBE")){
 			createCube(CUBE_SIZE);
 			nn = new NN(cube, NUM_INPUT, NUM_OUTPUT, sizes.length, sizes);
 			nnType = "CUBE";
-		}else{
+		}else if(type.equals("XOR")){
 			nn = new NN(new XOR(), 2, 1, sizes.length, sizes);
 			nnType = "XOR";
+		} else {
+			System.out.println("Invalid type");
+			printHelp();
+			return;
 		}
-		System.out.println("Neural Network Created");
+		System.out.println("Creating done succesfully");
 	}
 	
 
@@ -213,7 +222,7 @@ public class Main {
 			lines.add(new TrainData( "1 1", "-1"));
 		}
 		
-		FIleUtils.writeTrainingData(type, lines);
+		FileUtils.writeTrainingData(type, lines);
 		System.out.println("Done creating training data");
 	}
 
@@ -226,8 +235,8 @@ public class Main {
 	 */
 	private static void trainNeuralNetwork(String type, double LEARN_RATE,
 			int train_iter, int train_epoch){
-		ArrayList<TrainData> training = FIleUtils.readTrainingData(type);
-		ArrayList<TrainData> testing = FIleUtils.readTrainingData(type);
+		ArrayList<TrainData> training = FileUtils.readTrainingData(type);
+		ArrayList<TrainData> testing = FileUtils.readTrainingData(type);
 
 		double err = BackPropagation.runForMinimum(nn, training, testing, 
 				LEARN_RATE, train_iter, train_epoch);
@@ -245,8 +254,8 @@ public class Main {
 	 */
 	private static void trainOldNeuralNetwork(String type, double LEARN_RATE,
 			int train_iter, int train_epoch){
-		ArrayList<TrainData> training = FIleUtils.readTrainingData(type);
-		ArrayList<TrainData> testing = FIleUtils.readTrainingData(type);
+		ArrayList<TrainData> training = FileUtils.readTrainingData(type);
+		ArrayList<TrainData> testing = FileUtils.readTrainingData(type);
 
 		double err = BackPropagation.runOld(nn, training, testing, 
 				LEARN_RATE, train_iter, train_epoch);
@@ -285,7 +294,8 @@ public class Main {
 				if(resp.equals("Q")){
 					break;
 				} else{
-					cube.turn(resp);						
+					if(!cube.turn(resp))
+						System.out.println("Invalid move format, try again");						
 				}
 			}
 			
@@ -295,12 +305,18 @@ public class Main {
 				System.out.println("Solved!!!");
 			}
 		}else{
-			System.out.println("Enter an input (for ex. -1 1)");
+			System.out.println("Enter input (e.g. -1 1):");
 			double[] input = new double[2];
-			input[0] = scan.nextDouble();
-			input[1] = scan.nextDouble();
+			try{
+				input[0] = scan.nextDouble();
+				input[1] = scan.nextDouble();
+			} catch(Exception e) {
+				System.out.println("Invalid input");
+				return;
+			}
+			
 			double[] move = nn.feedForward(input);
-			System.out.println("Neural Network Says " + move[0]);
+			System.out.println("Output: " + move[0]);
 		}
 		
 		if(cube != null){
