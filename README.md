@@ -14,7 +14,7 @@ On Unix systes, run bash script *run.sh*:
 ```
 
 ## CLI
-After the start of the program, the help with available commands is displayed. Now we will provide an example how to use the program. Read the section *Commands* section for all commands description.
+After the start of the program, the help with available commands is displayed. Now we will provide an example how to use the program. Read the section [Commands](#commands) section for all commands description.
 
 ### Example usage
 If not changed, there is an default trained neural network that can solve 3x3x3 cube. We will use this network in this simple example.
@@ -29,7 +29,7 @@ Secondly type:
 ```
 solve
 ```
-This command will shutter the cube using 1 to 5 moves (this number can be chaged, see *Configuration* section) and display the cube configuration into console (see *Solve* section for more info). It computes the recommended move using the neural network and this move is performed by pressing **enter** (see *Solve* section for more options). This repeats infinitely unless the cube is not solved. Although the program solves the cube in most cases, it does not solve it in every case. By that reason, it is possible to get out of the *solve* interface by typing **Q**.
+This command will shutter the cube using 1 to 5 moves (this number can be chaged, see [Configuration](#configuration) section) and display the cube configuration into console (see [Solve](#solve) section for more info). It computes the recommended move using the neural network and this move is performed by pressing **enter** (see [Solve](#solve) section for more options). This repeats infinitely unless the cube is not solved. Although the program solves the cube in most cases, it does not solve it in every case. By that reason, it is possible to get out of the [Solve](#solve) interface by typing **Q**.
 
 Try to perform the *solve* command several times and then type **quit** to quit the program.
 
@@ -42,13 +42,13 @@ Creates a new neural network that can solve either Rubik's cube or XOR operation
 Type *create XOR* for creating neural network for XOR operation and *create CUBE* for creating neural network that can solve Rubik's cube. Then you will be asked for choosing number of hidden neurons and hidden layers and the neural network will be created. This network will consist of random neuron weights and will not be trained yet.
 
 #### load (XOR|CUBE)
-Loads saved neural network from file. The file name can be configured in configuration file (see Configuration). There is one default file for each of the XOR and CUBE type neural networks. Type one of *load XOR* or *load CUBE* to perform this command.
+Loads saved neural network from file. The file name can be configured in configuration file (see [Configuration](#configuration)). There is one default file for each of the XOR and CUBE type neural networks. Type one of *load XOR* or *load CUBE* to perform this command.
 
 #### save
-It checks the loaded or created neural network type (one of XOR or CUBE) and saves it to corresponding file which name can be configured (see Configuration). The network has to be loaded or created first.
+It checks the loaded or created neural network type (one of XOR or CUBE) and saves it to corresponding file which name can be configured (see [Configuration](#configuration)). The network has to be loaded or created first.
 
 #### traindata (XOR|CUBE)
-Generates file contating training data that are used later in *trainbest* and *train* commands. The train data for XOR are trivial and are generated automatically, the train data for cube are more complex and parameters can be changed in configuration file (see Configuration).
+Generates file contating training data that are used later in *trainbest* and *train* commands. The train data for XOR are trivial and are generated automatically, the train data for cube are more complex and parameters can be changed in configuration file (see [Configuration](#configuration)).
 
 #### trainbest
 Creates and trains many neural network of the type as the loaded or creating network has (cube or xor, number of hidden neurons and layers) and chooses the best one. Parameters of the training can be configured (see Configuration). The training is accomplihed using stochastic back propagation.
@@ -61,7 +61,7 @@ After succesfully training neural network for computing xor operation or solving
 
 If the neural network is for computing xor operation, it asks for input and prints computed output. If the network is for solving cube, the behaviour is following.
 
-It scruble new plain Rubik's cube with random number of moves (the highest number can be configured, see Configuration), and displays the cube configuration to console.
+It scruble new plain Rubik's cube with random number of moves (the highest number can be configured, see [Configuration](#configuration)), and displays the cube configuration to console.
 
 ##### Cube Configuration Format
 The 3D cube is represented using it's 2D network. An example of 3x3x3 cube representation follows:
