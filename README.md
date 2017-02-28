@@ -1,7 +1,7 @@
 # CubeSolver
 The program CubeSolver is an example of neural network used for solving Rubik's Cube of generic size. Its features includes creating of neural network with any number of hidden layers of any number of input neurons, training the neural network using stochastic back propagation algorithm and it can also graphically dispalay the Rubik's Cube in order to test the the neural network.
 
-## Building
+## Compiling
 On Unix systems, simply navigate to project directory and run:
 ```bash
 ant compile
@@ -91,3 +91,19 @@ left  up  right
      down
 ```
 
+##### Neural Network Output
+There are 6 faces on the cube, each face can be rotated in 2 directions so it makes 12 movements we can do in every solving step. Although the cube size can be configured, the number of these movements is most reasonable for 3x3, maybe 2x2 cubes. These 12 movements are noted using the letter characterizing cube face (R,L,U,D,F,B) and sufixed with apostroph for counter clock wise movements. It means we have these movements: R, L, U, D, F, B, R', L', U', D', F' and B'. This notation is commonly used in Rubik's cube solving community.
+
+The neural network express confidence using each movement in percents when the best confidence has most percents. These percents are displayed and the movement with the biggest confidence is reccomended to user. The user can then apply this recommendation just by pressing **enter** or choosing different movement by **typing its name**.
+
+##### Looping in Solving Steps
+The same procedure as described is repeaded util the cube is solved or until the solve command is quited by typing **Q**.
+
+#### help
+Displays help.
+
+#### quit
+Exits program.
+
+## Configuration
+The commands above can be configured in the file **config.conf**. The file is well commented.
